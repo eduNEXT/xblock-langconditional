@@ -28,9 +28,11 @@ from xmodule.x_module import (
     XModuleMixin,
     XModuleToXBlockMixin,
 )
+from xblockutils.resources import ResourceLoader
 
 
 log = logging.getLogger('edx.' + __name__)
+loader = ResourceLoader(__name__)
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
@@ -211,19 +213,40 @@ class LangConditionalXblock(
                 return True
         return False
 
+    def render_template(self, template_path, context=None) -> str:
+        """
+        Render a template with the given context. The template is translated
+        according to the user's language.
+
+        args:
+            template_path: The path to the template
+            context: The context to render in the template
+
+        returns:
+            The rendered template
+        """
+        return loader.render_django_template(
+            template_path, context, i18n_service=self.runtime.service(self, 'i18n')
+        )
+
     def student_view(self, _context):
         """
         Renders the student view.
         """
         fragment = Fragment()
-        fragment.add_content(self.get_html())
-        add_webpack_js_to_fragment(fragment, 'ConditionalBlockDisplay')
+        context = {
+            'element_id': self.location.html_id(),
+            'ajax_url': self.ajax_url,
+            'depends': ';'.join(block.location.html_id() for block in self.get_required_blocks),
+        }
+        fragment.add_content(self.render_template("static/html/conditional_ajax.html", context))
+        # add_webpack_js_to_fragment(fragment, 'ConditionalBlockDisplay')
         shim_xmodule_js(fragment, 'Conditional')
         return fragment
 
     def get_html(self):
         required_html_ids = [block.location.html_id() for block in self.get_required_blocks]
-        return self.runtime.service(self, 'mako').render_lms_template('conditional_ajax.html', {
+        return self.runtime.service(self, 'mako').render_lms_template('static/html/conditional_ajax.html', {
             'element_id': self.location.html_id(),
             'ajax_url': self.ajax_url,
             'depends': ';'.join(required_html_ids)
