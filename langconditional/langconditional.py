@@ -28,7 +28,6 @@ from xmodule.x_module import (
     XModuleMixin,
     XModuleToXBlockMixin,
 )
-from xmodule.conditional_block import ConditionalBlock
 
 
 log = logging.getLogger('edx.' + __name__)
@@ -112,7 +111,7 @@ class LangConditionalXblock(
         scope=Scope.content,
         default='correct',
         values=lambda: [{'display_name': xml_attr, 'value': xml_attr}
-                        for xml_attr in ConditionalBlock.conditions_map]
+                        for xml_attr in LangConditionalXblock.conditions_map]
     )
 
     conditional_value = String(
@@ -182,7 +181,7 @@ class LangConditionalXblock(
                     # CourseLocator.make_usage_key_from_deprecated_string, which was previously
                     # being called in this location.
                     BlockUsageLocator.from_string(item).replace(run=self.location.course_key.run)
-                    for item in ConditionalBlock.parse_sources(self.xml_attributes)
+                    for item in LangConditionalXblock.parse_sources(self.xml_attributes)
                 ]
 
     def is_condition_satisfied(self):  # lint-amnesty, pylint: disable=missing-function-docstring
@@ -387,7 +386,7 @@ class LangConditionalXblock(
     def non_editable_metadata_fields(self):
         non_editable_fields = super().non_editable_metadata_fields
         non_editable_fields.extend([
-            ConditionalBlock.due,
-            ConditionalBlock.show_tag_list,
+            LangConditionalXblock.due,
+            LangConditionalXblock.show_tag_list,
         ])
         return non_editable_fields
