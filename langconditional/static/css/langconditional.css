@@ -1,0 +1,9 @@
+/* CSS for LangConditionalXblock */
+
+.langconditional_block .count {
+    font-weight: bold;
+}
+
+.langconditional_block p {
+    cursor: pointer;
+}
