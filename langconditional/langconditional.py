@@ -137,7 +137,7 @@ class LangConditionalXblock(
 
     has_children = True
 
-    _tag_name = 'conditional'
+    _tag_name = 'langconditional'
 
     resources_dir = None
 
