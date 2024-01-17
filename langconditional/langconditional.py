@@ -6,6 +6,8 @@ ConditionalBlock is an XBlock which you can use for disabling some XBlocks by co
 import json
 import logging
 
+import pkg_resources
+from django.utils import translation
 from lazy import lazy
 from lxml import etree
 from opaque_keys.edx.locator import BlockUsageLocator
@@ -267,16 +269,76 @@ class LangConditionalXblock(
 
         return fragment
 
+    def resource_string(self, path):
+        """Handy helper for getting resources from our kit."""
+        data = pkg_resources.resource_string(__name__, path)
+        return data.decode("utf8")
+
+    @staticmethod
+    def _get_statici18n_js_url():
+        """
+        Return the Javascript translation file for the currently selected language, if any.
+
+        Defaults to English if available.
+        """
+        locale_code = translation.get_language()
+        if locale_code is None:
+            return None
+        text_js = 'public/js/translations/{locale_code}/text.js'
+        lang_code = locale_code.split('-')[0]
+        for code in (locale_code, lang_code, 'en'):
+            if pkg_resources.resource_exists(
+                    loader.module_name, text_js.format(locale_code=code)):
+                return text_js.format(locale_code=code)
+        return None
+
     def studio_view(self, _context):
         """
         Return the studio view.
         """
-        fragment = Fragment(
-            self.runtime.service(self, 'mako').render_cms_template(self.mako_template, self.get_context())
-        )
-        add_webpack_js_to_fragment(fragment, 'ConditionalBlockEditor')
-        shim_xmodule_js(fragment, self.studio_js_module_name)
+        fragment = Fragment()
+        context = self.get_context()
+        context.update({
+            "display_name": self.display_name,
+            "conditional_attr": self.conditional_attr,
+            "conditional_value": self.conditional_value,
+            "conditional_message": self.conditional_message,
+            "sources_list": self.sources_list,
+            "display_name_field": self.fields["display_name"],
+            "conditional_attr_field": self.fields["conditional_attr"],
+            "conditional_attr_options": self.fields["conditional_attr"].values,
+            "conditional_value_field": self.fields["conditional_value"],
+            "conditional_message_field": self.fields["conditional_message"],
+            "sources_list_field": self.fields["sources_list"],
+        })
+        fragment.add_content(self.render_template("static/html/conditional_edit.html", context))
+        statici18n_js_url = self._get_statici18n_js_url()
+        if statici18n_js_url:
+            fragment.add_javascript_url(
+                self.runtime.local_resource_url(self, statici18n_js_url)
+            )
+        fragment.add_javascript(self.resource_string("static/js/src/editor/editor.js"))
+        fragment.initialize_js("LangConditionalXBlock")
+        # fragment = Fragment(
+        #     self.runtime.service(self, 'mako').render_cms_template(self.mako_template, self.get_context())
+        # )
+        # add_webpack_js_to_fragment(fragment, 'ConditionalBlockEditor')
+        # shim_xmodule_js(fragment, self.studio_js_module_name)
         return fragment
+
+    @XBlock.json_handler
+    def studio_submit(self, data, suffix=""):
+        """
+        Called when submitting the form in Studio.
+        """
+        self.display_name = data.get("display_name")
+        self.conditional_attr = data.get("conditional_attr")
+        self.conditional_value = data.get("conditional_value")
+        self.conditional_message = data.get("conditional_message")
+        self.sources_list = list(data.get("sources_list"))
+        return {
+            "result": "success",
+        }
 
     def handle_ajax(self, _dispatch, _data):
         """This is called by courseware.block_render, to handle
