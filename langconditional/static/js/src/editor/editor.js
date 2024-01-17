@@ -10,7 +10,7 @@ function LangConditionalXBlock(runtime, element) {
         console.log(sourcesList);
         var data = {
             display_name: $(element).find('input[name=langconditional_display_name]').val(),
-            conditional_message: $(element).find('textarea[name=langconditional_conditional_message]').val(),
+            conditional_message: $(element).find('input[name=langconditional_conditional_message]').val(),
             conditional_attr: $(element).find('select[name=langconditional_conditional_attr]').val(),
             conditional_value: $(element).find('input[name=langconditional_conditional_value]').val(),
             sources_list: sourcesList,
