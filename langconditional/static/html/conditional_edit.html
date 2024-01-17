@@ -1,0 +1,85 @@
+{% load i18n %}
+
+<div class="wrapper-comp-settings is-active editor-with-buttons" id="settings-tab">
+  <ul class="list-input settings-list">
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="langconditional_display_name">{% trans "Display name" %}</label>
+        <input class="input setting-input" name="langconditional_display_name" id="langconditional_display_name" value="{{display_name}}" type="text" />
+      </div>
+      <span class="tip setting-help"> {% trans display_name_field.help %} </span>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="langconditional_conditional_message">{% trans "Blocked Content Message" %}</label>
+        <input class="input setting-input" name="langconditional_conditional_message" id="langconditional_conditional_message" value="{{conditional_message}}" type="text" />
+      </div>
+      <span class="tip setting-help"> {% trans conditional_message_field.help %} </span>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="langconditional_conditional_attr">{% trans "Conditional Attribute" %}</label>
+        <select id="langconditional_conditional_attr" class="input setting-input" name="langconditional_conditional_attr" >
+          {% for option in conditional_attr_options %}
+            {% if option.value == conditional_attr %}
+              <option value={{option.display_name}} selected>{{option.value}}</option>
+            {% else %}
+              <option value={{option.display_name}} >{{option.value}}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <span class="tip setting-help"> {% trans conditional_attr_field.help %} </span>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="langconditional_conditional_value">{% trans "Conditional Value" %}</label>
+        <input class="input setting-input" name="langconditional_conditional_value" id="langconditional_conditional_value" value="{{conditional_value}}" type="text" />
+      </div>
+      <span class="tip setting-help"> {% trans conditional_value_field.help %} </span>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting metadata-list-enum">
+        <label class="label setting-label" for="langconditional_sources_list">{% trans "Source Components" %}</label>
+        <div class="wrapper-list-settings" id="langconditional_sources_list">
+          {% if not sources_list %}
+            <ol class="list-settings">
+                <li class="list-settings-item">
+                    <input class="input setting-input" name="langconditional_sources_list" id="langconditional_sources_list_0" value="" type="text" />
+                    <!-- <a class="remove-action remove-setting" href="#">
+                        <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    </a> -->
+                </li>
+            </ol>
+          {% else %}
+            {% for source in sources_list %}
+            <ol class="list-settings">
+                <li class="list-settings-item">
+                    <input class="input setting-input" name="langconditional_sources_list" id="langconditional_sources_list_{{source}}" value="{{source}}" type="text" />
+                    <!-- <a class="remove-action remove-setting" href="#">
+                        <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    </a> -->
+                </li>
+            </ol>
+            <!-- <a class="create-action create-setting" href="#">
+                <span class="fa fa-plus" aria-hidden="true">{% trans "Add" %}</span>
+            </a> -->
+          </div>
+          {% endfor %}
+        {% endif %}
+    </div>
+      <span class="tip setting-help"> {% trans sources_list_field.help %} </span>
+    </li>
+  </ul>
+
+  <div class="xblock-actions">
+    <ul>
+      <li class="action-item">
+        <a href="#" class="button action-primary save-button">{% trans "Save" %}</a>
+      </li>
+      <li class="action-item">
+        <a href="#" class="button cancel-button">{% trans "Cancel" %}</a>
+      </li>
+    </ul>
+  </div>
+</div>
